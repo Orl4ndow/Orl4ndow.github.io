@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Gestão - Projeto Baja SAE</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fontes e Ícones -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -24,7 +21,6 @@
 </head>
 <body class="h-screen flex bg-gray-100">
 
-    <!-- Ecrã de Carregamento -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm flex justify-center items-center z-50">
         <div class="text-center">
             <div class="loader mx-auto"></div>
@@ -32,7 +28,6 @@
         </div>
     </div>
     
-    <!-- Modal de Login -->
     <div id="login-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-40 hidden">
         <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm mx-auto">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login de Administrador</h2>
@@ -45,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Sidebar de Navegação -->
     <nav class="w-64 bg-white shadow-lg flex-col hidden md:flex">
         <div class="p-6 text-center border-b">
             <h1 class="text-xl font-bold text-indigo-600">Quarter Mile BAJA UERJ</h1>
@@ -67,9 +61,7 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-1 p-4 md:p-8 overflow-y-auto">
-        <!-- Página: Dashboard -->
         <div id="dashboard" class="page active">
             <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -86,7 +78,6 @@
                  </form>
              </div>
         </div>
-        <!-- Outras páginas (Escopo, EAP, etc.) -->
         <div id="escopo" class="page"><h2 class="text-3xl font-bold mb-6">Termo de Abertura e Escopo</h2><div class="bg-white p-6 rounded-lg shadow"><textarea id="escopo-text" class="w-full h-96 p-2 border rounded" placeholder="Descreva aqui o escopo..."></textarea><button id="salvar-escopo" class="js-admin-view hidden mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Guardar Escopo</button></div></div>
         <div id="eap" class="page"><h2 class="text-3xl font-bold mb-6">EAP - Estrutura Analítica do Projeto</h2><div class="bg-white p-6 rounded-lg shadow"><form id="eap-form" class="js-admin-view hidden mb-4 grid grid-cols-1 md:grid-cols-4 gap-4"><input type="text" id="eap-codigo" placeholder="Código (ex: 1.1)" class="p-2 border rounded" required><input type="text" id="eap-descricao" placeholder="Descrição da Tarefa" class="p-2 border rounded col-span-2" required><button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Adicionar Tarefa</button></form><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead id="eap-head" class="bg-gray-50"></thead><tbody id="eap-table"></tbody></table></div></div></div>
         <div id="cronograma" class="page"><h2 class="text-3xl font-bold mb-6">Lista de Tarefas do Cronograma</h2><div class="bg-white p-6 rounded-lg shadow"><form id="gantt-form" class="js-admin-view hidden mb-4 grid grid-cols-1 md:grid-cols-5 gap-4"><input type="text" id="gantt-id" placeholder="ID da Tarefa (ex: 1.1.1)" class="p-2 border rounded" required><input type="text" id="gantt-responsavel" placeholder="Responsável" class="p-2 border rounded" required><div><label class="text-sm">Início</label><input type="date" id="gantt-inicio" class="p-2 border rounded w-full" required></div><div><label class="text-sm">Fim</label><input type="date" id="gantt-fim" class="p-2 border rounded w-full" required></div><button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 self-end">Adicionar Tarefa</button></form><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead id="cronograma-head" class="bg-gray-50"></thead><tbody id="cronograma-table"></tbody></table></div></div></div>
@@ -106,12 +97,12 @@
             const loadingOverlay = document.getElementById('loading-overlay');
             
             const firebaseConfig = {
-                apiKey: "AIzaSyDSt6t_gQCW94cXoQKarPcbqOJkXppWzZc",
+                apiKey: "AIzaSyDSt4pAqCzdUx4Nw-ON_dtAfj5L7ZyTMRo",
                 authDomain: "baja-eletronica.firebaseapp.com",
                 projectId: "baja-eletronica",
-                storageBucket: "baja-eletronica.appspot.com",
+                storageBucket: "baja-eletronica.firebasestorage.app",
                 messagingSenderId: "770422250340",
-                appId: "1:770422250340:web:40dd3f5d8166854f8bf871"
+                appId: "1:770422250340:web:81eb0ff2c7959dfd8bf871"
             };
 
             if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("AIzaSy...")) {
@@ -197,7 +188,7 @@
             // --- Funções Genéricas de CRUD ---
             window.deleteItem = async (collectionName, id) => {
                 if (confirm(`Tem a certeza que quer apagar este item?`)) {
-                    await deleteDoc(doc(db, `${projectDocPath}/${collectionName}`, id));
+                    await deleteDoc(doc(db, `<span class="math-inline">\{projectDocPath\}/</span>{collectionName}`, id));
                 }
             };
             
@@ -237,7 +228,7 @@
                     document.getElementById('eap-table').innerHTML = snapshot.docs.map(doc => {
                         const item = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<td class="px-6 py-4"><button onclick="deleteItem('eap', '${item.id}')" class="text-red-500 hover:text-red-700">Apagar</button></td>` : '';
-                        return `<tr class="hover:bg-gray-50"><td class="px-6 py-4">${item.codigo}</td><td class="px-6 py-4">${item.descricao}</td>${deleteBtn}</tr>`
+                        return `<tr class="hover:bg-gray-50"><td class="px-6 py-4"><span class="math-inline">\{item\.codigo\}</td\><td class\="px\-6 py\-4"\></span>{item.descricao}</td>${deleteBtn}</tr>`
                     }).join('');
                 });
             }
@@ -264,10 +255,10 @@
                     cronogramaTable.innerHTML = tasks.map(task => {
                         const deleteBtn = authState.isLoggedIn ? `<td class="px-6 py-4 whitespace-nowrap"><button onclick="deleteItem('cronograma', '${task.id}')" class="text-red-500 hover:text-red-700">Apagar</button></td>` : '';
                         return `<tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">${task.taskId}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.responsavel}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${new Date(task.inicio + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${new Date(task.fim + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="math-inline">\{task\.taskId\}</td\>
+<td class\="px\-6 py\-4 whitespace\-nowrap"\></span>{task.responsavel}</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="math-inline">\{new Date\(task\.inicio \+ 'T00\:00\:00'\)\.toLocaleDateString\('pt\-BR'\)\}</td\>
+<td class\="px\-6 py\-4 whitespace\-nowrap"\></span>{new Date(task.fim + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                             ${deleteBtn}
                         </tr>`;
                     }).join('');
@@ -288,7 +279,7 @@
                     document.getElementById('riscos-table').innerHTML = s.docs.map(doc => {
                         const i = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<td class="px-6 py-4"><button onclick="deleteItem('riscos', '${i.id}')" class="text-red-500">Apagar</button></td>` : '';
-                        return `<tr><td class="px-6 py-4">${i.descricao}</td><td>${i.probabilidade}</td><td>${i.impacto}</td><td>${i.mitigacao}</td>${deleteBtn}</tr>`;
+                        return `<tr><td class="px-6 py-4"><span class="math-inline">\{i\.descricao\}</td\><td\></span>{i.probabilidade}</td><td><span class="math-inline">\{i\.impacto\}</td\><td\></span>{i.mitigacao}</td>${deleteBtn}</tr>`;
                     }).join('');
                 });
             }
@@ -304,7 +295,7 @@
                     document.getElementById('reunioes-list').innerHTML = s.docs.map(doc => {
                         const i = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<button onclick="deleteItem('reunioes', '${i.id}')" class="absolute top-2 right-2 text-red-500 text-xs">Apagar</button>` : '';
-                        return `<div class="bg-gray-50 p-4 rounded-lg relative">${deleteBtn}<h4 class="font-bold">${new Date(i.data+'T00:00:00').toLocaleDateString('pt-BR')}</h4><p class="text-sm"><strong>Participantes:</strong> ${i.participantes}</p><p class="text-sm mt-2 whitespace-pre-wrap">${i.pauta}</p></div>`;
+                        return `<div class="bg-gray-50 p-4 rounded-lg relative"><span class="math-inline">\{deleteBtn\}<h4 class\="font\-bold"\></span>{new Date(i.data+'T00:00:00').toLocaleDateString('pt-BR')}</h4><p class="text-sm"><strong>Participantes:</strong> <span class="math-inline">\{i\.participantes\}</p\><p class\="text\-sm mt\-2 whitespace\-pre\-wrap"\></span>{i.pauta}</p></div>`;
                     }).join('');
                 });
             }
@@ -320,7 +311,7 @@
                     document.getElementById('galeria-grid').innerHTML = s.docs.map(doc => {
                         const i = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<button onclick="deleteItem('galeria', '${i.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100">&times;</button>` : '';
-                        return `<div class="relative group"><img src="${i.url}" alt="${i.legenda}" class="w-full h-48 object-cover rounded-lg shadow-md" onerror="this.src='https://placehold.co/600x400/eee/ccc?text=Imagem+Inválida'"><div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm rounded-b-lg">${i.legenda}</div>${deleteBtn}</div>`;
+                        return `<div class="relative group"><img src="<span class="math-inline">\{i\.url\}" alt\="</span>{i.legenda}" class="w-full h-48 object-cover rounded-lg shadow-md" onerror="this.src='https://placehold.co/600x400/eee/ccc?text=Imagem+Inválida'"><div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm rounded-b-lg"><span class="math-inline">\{i\.legenda\}</div\></span>{deleteBtn}</div>`;
                     }).join('');
                 });
             }
@@ -343,7 +334,7 @@
                     document.getElementById('links-list').innerHTML = s.docs.map(doc => {
                          const i = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<button onclick="deleteItem('links', '${i.id}')" class="text-red-500 text-xl">&times;</button>` : '';
-                        return `<div class="flex justify-between items-center bg-gray-50 p-2 rounded"><a href="${i.url}" target="_blank" class="text-indigo-600 hover:underline">${i.descricao}</a>${deleteBtn}</div>`
+                        return `<div class="flex justify-between items-center bg-gray-50 p-2 rounded"><a href="<span class="math-inline">\{i\.url\}" target\="\_blank" class\="text\-indigo\-600 hover\:underline"\></span>{i.descricao}</a>${deleteBtn}</div>`
                     }).join('');
                 });
             }
@@ -359,7 +350,7 @@
                     const avisosHTML = s.docs.map(doc => {
                         const i = {id: doc.id, ...doc.data()};
                         const deleteBtn = authState.isLoggedIn ? `<button onclick="deleteItem('avisos', '${i.id}')" class="text-red-500 text-xs ml-2 absolute right-0 bottom-2">Apagar</button>` : '';
-                        return `<div class="border-b pb-2 mb-2 relative"><p>${i.texto}</p><span class="text-xs text-gray-400">${new Date(i.createdAt.toDate()).toLocaleString('pt-BR')}</span> ${deleteBtn}</div>`;
+                        return `<div class="border-b pb-2 mb-2 relative"><p><span class="math-inline">\{i\.texto\}</p\><span class\="text\-xs text\-gray\-400"\></span>{new Date(i.createdAt.toDate()).toLocaleString('pt-BR')}</span> ${deleteBtn}</div>`;
                     }).join('');
                     document.getElementById('avisos-dashboard-content').innerHTML = avisosHTML;
                     document.getElementById('avisos-list').innerHTML = avisosHTML;
@@ -374,13 +365,13 @@
             // Dashboard
             function renderDashboard(db) {
                 onSnapshot(query(collection(db, `${projectDocPath}/cronograma`)), s => {
-                    document.getElementById('dashboard-prazos').innerHTML = s.docs.map(doc=>doc.data()).filter(t=>t.fim && new Date(t.fim) >= new Date()).sort((a,b)=>new Date(a.fim) - new Date(b.fim)).slice(0,3).map(t=>`<p>${t.taskId}: <span class="font-semibold">${new Date(t.fim+'T00:00:00').toLocaleDateString('pt-BR')}</span></p>`).join('') || '<p class="text-gray-400">Nenhum prazo futuro.</p>';
+                    document.getElementById('dashboard-prazos').innerHTML = s.docs.map(doc=>doc.data()).filter(t=>t.fim && new Date(t.fim) >= new Date()).sort((a,b)=>new Date(a.fim) - new Date(b.fim)).slice(0,3).map(t=>`<p><span class="math-inline">\{t\.taskId\}\: <span class\="font\-semibold"\></span>{new Date(t.fim+'T00:00:00').toLocaleDateString('pt-BR')}</span></p>`).join('') || '<p class="text-gray-400">Nenhum prazo futuro.</p>';
                 });
                 onSnapshot(query(collection(db, `${projectDocPath}/riscos`)), s => {
                      document.getElementById('dashboard-riscos').innerHTML = s.docs.map(doc=>doc.data()).filter(r=>r.probabilidade === 'Alta' && r.impacto === 'Alto').slice(0,3).map(r=>`<p>${r.descricao}</p>`).join('') || '<p class="text-gray-400">Nenhum risco crítico.</p>';
                 });
                 onSnapshot(query(collection(db, `${projectDocPath}/reunioes`), orderBy("data", "desc")), s => {
-                    if(!s.empty) document.getElementById('dashboard-reuniao').innerHTML = `<p>Data: <span class="font-semibold">${new Date(s.docs[0].data().data+'T00:00:00').toLocaleDateString('pt-BR')}</span></p><p class="truncate">${s.docs[0].data().pauta}</p>`;
+                    if(!s.empty) document.getElementById('dashboard-reuniao').innerHTML = `<p>Data: <span class="font-semibold"><span class="math-inline">\{new Date\(s\.docs\[0\]\.data\(\)\.data\+'T00\:00\:00'\)\.toLocaleDateString\('pt\-BR'\)\}</span\></p\><p class\="truncate"\></span>{s.docs[0].data().pauta}</p>`;
                     else document.getElementById('dashboard-reuniao').innerHTML = '<p class="text-gray-400">Nenhuma reunião registada.</p>';
                 });
             }
