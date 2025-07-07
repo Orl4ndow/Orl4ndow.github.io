@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro Inteligente e Colaborativo</title>
+    <title>Controle Financeiro</title>
+    <link rel="icon" type="image/png" href="gastosft.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +17,10 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #status-indicator { transition: opacity 0.5s ease-in-out; }
+        .profile-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s ease-in-out; border: 2px solid transparent; }
+        .profile-btn.active { background-color: #4f46e5; color: white; }
+        .profile-btn:not(.active) { background-color: #e0e7ff; color: #3730a3; }
+        .profile-btn:not(.active):hover { background-color: #c7d2fe; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -30,7 +35,7 @@
     <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8" style="visibility: hidden;">
         <header class="text-center mb-8 relative">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Controle Financeiro Inteligente</h1>
-            <p class="text-md text-gray-600 mt-2">Dados colaborativos em tempo real para sua gestão financeira.</p>
+            <p class="text-md text-gray-600 mt-2">Cuidado ao apagar e adicionar dados</p>
             <div id="status-indicator" class="absolute top-0 right-0 flex items-center space-x-2 opacity-0">
                 <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <span class="text-sm text-gray-600 font-medium">Conectado</span>
@@ -39,54 +44,52 @@
 
         <div class="bg-white p-6 rounded-xl shadow-md mb-8">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Nova Transação</h2>
-            <form id="transaction-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <form id="transaction-form" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
                 <div> <label for="date" class="block text-sm font-medium text-gray-700">Data</label> <input type="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required> </div>
                 <div> <label for="description" class="block text-sm font-medium text-gray-700">Descrição</label> <input type="text" id="description" placeholder="Ex: Salário, Aluguel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required> </div>
+                <div> <label for="profile" class="block text-sm font-medium text-gray-700">Perfil</label> <select id="profile" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required> <option>Thayssa</option> <option>Orlando</option> </select> </div>
                 <div> <label for="category" class="block text-sm font-medium text-gray-700">Categoria</label> <select id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required> <option>Moradia</option> <option>Alimentação</option> <option>Transporte</option> <option>Saúde</option> <option>Lazer</option> <option>Educação</option> <option>Pessoal</option> <option>Receitas</option> <option>Outros</option> </select> </div>
                 <div> <label for="amount" class="block text-sm font-medium text-gray-700">Valor (R$)</label> <input type="number" id="amount" step="0.01" placeholder="150.50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required> </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700">Adicionar</button>
             </form>
         </div>
 
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex flex-col sm:flex-row justify-center items-center gap-6">
+            <div class="flex items-center space-x-2">
+                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <span id="month-display" class="font-semibold text-gray-700 w-40 text-center text-lg"></span>
+                <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+            <div id="profile-switcher" class="flex justify-center space-x-2">
+                <button id="profile-btn-geral" class="profile-btn active">Geral</button>
+                <button id="profile-btn-thayssa" class="profile-btn">Thayssa</button>
+                <button id="profile-btn-orlando" class="profile-btn">Orlando</button>
+            </div>
+        </div>
+
         <div class="mb-8">
-             <h2 class="text-2xl font-semibold mb-4 text-gray-800 text-center">Dashboard Financeiro</h2>
              <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-md chart-card">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold">Balanço Mensal</h3>
-                        <div class="flex items-center space-x-2">
-                            <button id="prev-month-btn" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                            </button>
-                            <span id="month-display" class="font-semibold text-gray-700 w-32 text-center text-sm sm:text-base"></span>
-                            <button id="next-month-btn" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="balance-summary"></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md chart-card">
-                    <h3 class="text-xl font-semibold mb-4 text-center">Despesas do Mês por Categoria</h3>
-                    <canvas id="pieChart"></canvas>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md chart-card">
-                    <h3 class="text-xl font-semibold mb-4 text-center">Comparativo de Despesas do Mês</h3>
-                    <canvas id="barChart"></canvas>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md chart-card lg:col-span-3">
-                    <h3 class="text-xl font-semibold mb-4 text-center">Evolução Financeira (Geral)</h3>
-                    <canvas id="lineChart"></canvas>
-                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card"><h3 class="text-xl font-semibold mb-4 text-center">Balanço Mensal - Thayssa</h3><div id="balance-summary-thayssa"></div></div>
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card"><h3 class="text-xl font-semibold mb-4 text-center">Balanço Mensal - Orlando</h3><div id="balance-summary-orlando"></div></div>
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card"><h3 class="text-xl font-semibold mb-4 text-center">Balanço Mensal - Geral</h3><div id="balance-summary-geral"></div></div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card lg:col-span-2 flex flex-col"><h3 class="text-xl font-semibold mb-4 text-center flex-shrink-0">Despesas do Mês por Categoria</h3><div class="relative h-64 md:h-80"><canvas id="pieChart"></canvas></div></div>
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card flex flex-col"><h3 class="text-xl font-semibold mb-4 text-center flex-shrink-0">Comparativo de Despesas do Mês</h3><div class="relative h-64 md:h-80"><canvas id="barChart"></canvas></div></div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md chart-card lg:col-span-3 flex flex-col"><h3 class="text-xl font-semibold mb-4 text-center flex-shrink-0">Evolução Financeira</h3><div class="relative h-64 md:h-80"><canvas id="lineChart"></canvas></div></div>
              </div>
         </div>
 
         <div>
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Histórico de Lançamentos</h2>
+            <h2 id="history-title" class="text-2xl font-semibold mb-4 text-gray-800">Histórico de Lançamentos</h2>
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50"> <tr> <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th> </tr> </thead>
+                        <thead class="bg-gray-50"> <tr> <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th> </tr> </thead>
                         <tbody id="transaction-table-body" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
@@ -97,7 +100,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDwjEup__qwXxdamChAeGJPSUgoObSg7E0",
@@ -109,16 +112,13 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-             initializeAppLogic(firebaseConfig);
-        });
-
-        async function initializeAppLogic(config) {
+            // Elementos do DOM
             const loadingOverlay = document.getElementById('loading-overlay');
             const appContainer = document.getElementById('app-container');
-            
             const form = document.getElementById('transaction-form');
             const dateInput = document.getElementById('date');
             const descriptionInput = document.getElementById('description');
+            const profileInput = document.getElementById('profile');
             const categoryInput = document.getElementById('category');
             const amountInput = document.getElementById('amount');
             const tableBody = document.getElementById('transaction-table-body');
@@ -126,35 +126,45 @@
             const prevMonthBtn = document.getElementById('prev-month-btn');
             const nextMonthBtn = document.getElementById('next-month-btn');
             const monthDisplay = document.getElementById('month-display');
+            const profileSwitcher = document.getElementById('profile-switcher');
+            const historyTitle = document.getElementById('history-title');
             
+            // Estado do Aplicativo
             let transactions = [];
             let pieChart, barChart, lineChart;
             let selectedDate = new Date();
+            let activeProfile = 'Geral'; 
 
             try {
-                const app = initializeApp(config);
+                // Inicialização do Firebase
+                const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
-                await signInAnonymously(auth);
+                signInAnonymously(auth);
 
                 const collectionPath = `/transactions-data/shared/all-transactions`;
                 const transactionsCollection = collection(db, collectionPath);
                 
+                // Funções
                 window.deleteTransaction = async (id) => {
                     if (confirm("Você tem certeza que deseja excluir esta transação?")) {
                         try {
                             await deleteDoc(doc(db, collectionPath, id));
-                        } catch (error) {
-                            console.error("Erro ao excluir transação: ", error);
-                            alert("Ocorreu um erro ao excluir a transação.");
-                        }
+                        } catch (error) { console.error("Erro ao excluir transação: ", error); alert("Ocorreu um erro ao excluir."); }
                     }
                 };
 
                 const addTransaction = async (e) => {
                     e.preventDefault();
                     if (!dateInput.value) { alert("Por favor, selecione uma data."); return; }
-                    const newTransaction = { date: dateInput.value, description: descriptionInput.value, category: categoryInput.value, amount: parseFloat(amountInput.value), createdAt: new Date().toISOString() };
+                    const newTransaction = {
+                        date: dateInput.value,
+                        description: descriptionInput.value,
+                        profile: profileInput.value,
+                        category: categoryInput.value,
+                        amount: parseFloat(amountInput.value),
+                        createdAt: new Date().toISOString()
+                    };
                     try { 
                         await addDoc(transactionsCollection, newTransaction);
                         selectedDate = new Date(dateInput.value + 'T00:00:00'); 
@@ -163,26 +173,40 @@
                     } catch (error) { console.error("Erro ao adicionar transação: ", error); }
                 };
                                 
-                onSnapshot(query(transactionsCollection), (snapshot) => {
+                onSnapshot(query(transactionsCollection, orderBy("date", "desc")), (snapshot) => {
                     transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
                     updateUI();
                     loadingOverlay.style.display = 'none';
                     appContainer.style.visibility = 'visible';
                     statusIndicator.style.opacity = '1';
                 });
                 
+                // Event Listeners
                 form.addEventListener('submit', addTransaction);
+                
                 prevMonthBtn.addEventListener('click', () => {
                     selectedDate.setMonth(selectedDate.getMonth() - 1);
-                    updateMonthlyBalance();
+                    updateAllMonthlyBalances();
                     updateCharts();
+                    renderTable();
                 });
+
                 nextMonthBtn.addEventListener('click', () => {
                     selectedDate.setMonth(selectedDate.getMonth() + 1);
-                    updateMonthlyBalance();
+                    updateAllMonthlyBalances();
                     updateCharts();
+                    renderTable();
                 });
+
+                profileSwitcher.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        activeProfile = e.target.textContent;
+                        document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        updateCharts();
+                    }
+                });
+
                 dateInput.valueAsDate = new Date();
 
             } catch (error) {
@@ -190,16 +214,36 @@
                 if(loadingOverlay) loadingOverlay.innerHTML = `<p class="text-red-500 font-semibold">Erro de conexão. Verifique as chaves do Firebase.</p>`;
             }
             
+            // --- Funções de Atualização da UI ---
             const updateUI = () => { 
                 renderTable(); 
+                updateAllMonthlyBalances();
                 updateCharts();
-                updateMonthlyBalance();
+            };
+            
+            const renderBalanceCard = (profileName, monthlyTransactions, elementId) => {
+                const container = document.getElementById(elementId);
+                if (!container) return;
+
+                const profileTransactions = profileName === 'Geral'
+                    ? monthlyTransactions
+                    : monthlyTransactions.filter(tx => tx.profile === profileName);
+
+                const totalReceitas = profileTransactions.filter(t => t.category === 'Receitas').reduce((sum, t) => sum + t.amount, 0);
+                const totalDespesas = profileTransactions.filter(t => t.category !== 'Receitas').reduce((sum, t) => sum + t.amount, 0);
+                const saldo = totalReceitas - totalDespesas;
+                
+                container.innerHTML = `
+                    <div class="space-y-4 text-center">
+                        <div><p class="text-sm text-gray-500">Receitas</p><p class="text-2xl font-semibold text-green-600">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p></div>
+                        <div><p class="text-sm text-gray-500">Despesas</p><p class="text-2xl font-semibold text-red-600">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p></div>
+                        <hr class="my-2 border-gray-200">
+                        <div><p class="text-sm text-gray-500">Saldo</p><p class="text-2xl font-bold ${saldo >= 0 ? 'text-gray-800' : 'text-red-700'}">R$ ${saldo.toFixed(2).replace('.', ',')}</p></div>
+                    </div>`;
             };
 
-            const updateMonthlyBalance = () => {
-                const balanceContainer = document.getElementById('balance-summary');
-                if (!balanceContainer || !monthDisplay) return;
-
+            const updateAllMonthlyBalances = () => {
+                if (!monthDisplay) return;
                 const monthYearString = selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
                 monthDisplay.textContent = monthYearString.charAt(0).toUpperCase() + monthYearString.slice(1);
 
@@ -210,55 +254,64 @@
                     return txDate.getFullYear() === targetYear && txDate.getMonth() === targetMonth;
                 });
 
-                const totalReceitas = monthlyTransactions.filter(t => t.category === 'Receitas').reduce((sum, t) => sum + t.amount, 0);
-                const totalDespesas = monthlyTransactions.filter(t => t.category !== 'Receitas').reduce((sum, t) => sum + t.amount, 0);
-                const saldo = totalReceitas - totalDespesas;
-
-                balanceContainer.innerHTML = `
-                    <div class="space-y-4 text-center">
-                        <div>
-                            <p class="text-sm text-gray-500">Receitas do Mês</p>
-                            <p class="text-2xl font-semibold text-green-600">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Despesas do Mês</p>
-                            <p class="text-2xl font-semibold text-red-600">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <hr class="my-2 border-gray-200">
-                        <div>
-                            <p class="text-sm text-gray-500">Saldo do Mês</p>
-                            <p class="text-2xl font-bold ${saldo >= 0 ? 'text-gray-800' : 'text-red-700'}">R$ ${saldo.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                    </div>
-                `;
+                renderBalanceCard('Thayssa', monthlyTransactions, 'balance-summary-thayssa');
+                renderBalanceCard('Orlando', monthlyTransactions, 'balance-summary-orlando');
+                renderBalanceCard('Geral', monthlyTransactions, 'balance-summary-geral');
             };
 
             const renderTable = () => {
+                const targetYear = selectedDate.getFullYear();
+                const targetMonth = selectedDate.getMonth();
+
+                const monthYearString = selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                historyTitle.textContent = `Histórico de Lançamentos - ${monthYearString.charAt(0).toUpperCase() + monthYearString.slice(1)}`;
+
+                const monthlyTransactions = transactions.filter(tx => {
+                    const txDate = new Date(tx.date + 'T00:00:00');
+                    return txDate.getFullYear() === targetYear && txDate.getMonth() === targetMonth;
+                });
+
                 tableBody.innerHTML = '';
-                if (transactions.length === 0) { tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Nenhuma transação registrada.</td></tr>`; return; }
-                transactions.forEach(tx => {
+                if (monthlyTransactions.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Nenhuma transação registrada para este mês.</td></tr>`;
+                    return;
+                }
+
+                monthlyTransactions.forEach(tx => {
                     const isExpense = tx.category !== 'Receitas';
                     const row = document.createElement('tr');
                     row.className = isExpense ? '' : 'bg-green-50';
-                    row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(tx.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${tx.description}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.category}</td> <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${isExpense ? 'text-red-600' : 'text-green-600'}">${isExpense ? '-' : '+'} R$ ${tx.amount.toFixed(2).replace('.',',')}</td> <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><button onclick="window.deleteTransaction('${tx.id}')" class="text-red-600 hover:text-red-900">Excluir</button></td>`;
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">${tx.profile || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(tx.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${tx.description}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.category}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${isExpense ? 'text-red-600' : 'text-green-600'}">${isExpense ? '-' : '+'} R$ ${tx.amount.toFixed(2).replace('.',',')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><button onclick="window.deleteTransaction('${tx.id}')" class="text-red-600 hover:text-red-900">Excluir</button></td>`;
                     tableBody.appendChild(row);
                 });
             };
 
+            // --- Funções de Coleta de Dados para Gráficos ---
+            const filterByProfile = (data) => {
+                if (activeProfile === 'Geral') return data;
+                return data.filter(tx => tx.profile === activeProfile);
+            };
+            
             const getMonthlyCategoryExpenseData = () => {
                 const targetYear = selectedDate.getFullYear();
                 const targetMonth = selectedDate.getMonth();
 
-                const monthlyExpenses = transactions.filter(tx => {
+                let monthlyTransactions = transactions.filter(tx => {
                     const txDate = new Date(tx.date + 'T00:00:00');
-                    return txDate.getFullYear() === targetYear && txDate.getMonth() === targetMonth && tx.category !== 'Receitas';
+                    return txDate.getFullYear() === targetYear && txDate.getMonth() === targetMonth;
                 });
 
+                const monthlyExpenses = filterByProfile(monthlyTransactions).filter(tx => tx.category !== 'Receitas');
                 const expenseData = monthlyExpenses.reduce((acc, tx) => {
                     acc[tx.category] = (acc[tx.category] || 0) + tx.amount;
                     return acc;
                 }, {});
-
                 return { labels: Object.keys(expenseData), data: Object.values(expenseData) };
             };
 
@@ -267,32 +320,20 @@
                 const monthOrder = monthNames.reduce((acc, name, index) => { acc[name] = index; return acc; }, {});
                 const monthlyExpenses = {}, monthlyIncomes = {};
 
-                transactions.forEach(tx => {
+                filterByProfile(transactions).forEach(tx => {
                     const date = new Date(tx.date + 'T00:00:00');
                     const monthKey = `${date.getFullYear()}-${monthNames[date.getMonth()]}`;
-                    if (tx.category === 'Receitas') {
-                        monthlyIncomes[monthKey] = (monthlyIncomes[monthKey] || 0) + tx.amount;
-                    } else {
-                        monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + tx.amount;
-                    }
+                    if (tx.category === 'Receitas') { monthlyIncomes[monthKey] = (monthlyIncomes[monthKey] || 0) + tx.amount; }
+                    else { monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + tx.amount; }
                 });
 
                 const allKeys = [...new Set([...Object.keys(monthlyExpenses), ...Object.keys(monthlyIncomes)])];
-                
                 allKeys.sort((a, b) => {
-                    const [yearA, monthStrA] = a.split('-');
-                    const [yearB, monthStrB] = b.split('-');
-                    if (yearA !== yearB) {
-                        return parseInt(yearA) - parseInt(yearB);
-                    }
+                    const [yearA, monthStrA] = a.split('-'); const [yearB, monthStrB] = b.split('-');
+                    if (yearA !== yearB) return parseInt(yearA) - parseInt(yearB);
                     return monthOrder[monthStrA] - monthOrder[monthStrB];
                 });
-
-                return {
-                    labels: allKeys,
-                    expenseData: allKeys.map(key => monthlyExpenses[key] || 0),
-                    incomeData: allKeys.map(key => monthlyIncomes[key] || 0)
-                };
+                return { labels: allKeys, expenseData: allKeys.map(key => monthlyExpenses[key] || 0), incomeData: allKeys.map(key => monthlyIncomes[key] || 0) };
             };
 
             const updateCharts = () => {
@@ -301,39 +342,15 @@
                 const backgroundColors = ['#4f46e5', '#7c3aed', '#db2777', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6'];
                 
                 if(pieChart) pieChart.destroy();
-                pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), { 
-                    type: 'doughnut', 
-                    data: { 
-                        labels: monthlyCategoryData.labels, 
-                        datasets: [{ data: monthlyCategoryData.data, backgroundColor: backgroundColors, hoverOffset: 4 }] 
-                    }, 
-                    options: { responsive: true, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.label}: R$ ${c.raw.toFixed(2)}` } } } } 
-                });
+                pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), { type: 'doughnut', data: { labels: monthlyCategoryData.labels, datasets: [{ data: monthlyCategoryData.data, backgroundColor: backgroundColors, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.label}: R$ ${c.raw.toFixed(2)}` } } } } });
                 
                 if(barChart) barChart.destroy();
-                barChart = new Chart(document.getElementById('barChart').getContext('2d'), { 
-                    type: 'bar', 
-                    data: { 
-                        labels: monthlyCategoryData.labels, 
-                        datasets: [{ label: 'Total Gasto (R$)', data: monthlyCategoryData.data, backgroundColor: backgroundColors[0] }] 
-                    }, 
-                    options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `R$ ${c.raw.toFixed(2)}` } } } } 
-                });
+                barChart = new Chart(document.getElementById('barChart').getContext('2d'), { type: 'bar', data: { labels: monthlyCategoryData.labels, datasets: [{ label: 'Total Gasto (R$)', data: monthlyCategoryData.data, backgroundColor: backgroundColors }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `R$ ${c.raw.toFixed(2)}` } } } } });
 
                 if(lineChart) lineChart.destroy();
-                lineChart = new Chart(document.getElementById('lineChart').getContext('2d'), {
-                    type: 'line', 
-                    data: { 
-                        labels: overallMonthlyData.labels, 
-                        datasets: [
-                            { label: 'Despesas', data: overallMonthlyData.expenseData, borderColor: 'rgb(220, 38, 38)', tension: 0.1 }, 
-                            { label: 'Receitas', data: overallMonthlyData.incomeData, borderColor: 'rgb(22, 163, 74)', tension: 0.1 }
-                        ] 
-                    },
-                    options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true }, tooltip: { callbacks: { label: c => `${c.dataset.label}: R$ ${c.raw.toFixed(2)}` } } } }
-                });
+                lineChart = new Chart(document.getElementById('lineChart').getContext('2d'), { type: 'line', data: { labels: overallMonthlyData.labels, datasets: [ { label: 'Despesas', data: overallMonthlyData.expenseData, borderColor: 'rgb(220, 38, 38)', tension: 0.1 }, { label: 'Receitas', data: overallMonthlyData.incomeData, borderColor: 'rgb(22, 163, 74)', tension: 0.1 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true }, tooltip: { callbacks: { label: c => `${c.dataset.label}: R$ ${c.raw.toFixed(2)}` } } } } });
             };
-        }
+        });
     </script>
 </body>
 </html>
