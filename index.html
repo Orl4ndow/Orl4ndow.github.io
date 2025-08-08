@@ -228,17 +228,36 @@
                 const profileTransactions = profileName === 'Geral'
                     ? monthlyTransactions
                     : monthlyTransactions.filter(tx => tx.profile === profileName);
-
+                
+                // --- CÁLCULO MENSAL (Existente) ---
                 const totalReceitas = profileTransactions.filter(t => t.category === 'Receitas').reduce((sum, t) => sum + t.amount, 0);
                 const totalDespesas = profileTransactions.filter(t => t.category !== 'Receitas').reduce((sum, t) => sum + t.amount, 0);
                 const saldo = totalReceitas - totalDespesas;
                 
+                // --- NOVO: CÁLCULO DO SALDO ATÉ O DIA ATUAL ---
+                const hoje = new Date();
+                hoje.setHours(23, 59, 59, 999); // Garante que o dia de hoje seja incluído por completo na comparação
+
+                // Filtra transações que ocorreram até a data de hoje
+                const transactionsAteHoje = profileTransactions.filter(tx => {
+                    const txDate = new Date(tx.date + 'T00:00:00');
+                    return txDate <= hoje;
+                });
+
+                const receitasAtuais = transactionsAteHoje.filter(t => t.category === 'Receitas').reduce((sum, t) => sum + t.amount, 0);
+                const despesasAtuais = transactionsAteHoje.filter(t => t.category !== 'Receitas').reduce((sum, t) => sum + t.amount, 0);
+                const saldoAtual = receitasAtuais - despesasAtuais;
+                // --- FIM DO NOVO CÓDIGO ---
+
+                // --- NOVO: HTML ATUALIZADO PARA INCLUIR O SALDO ATUAL ---
                 container.innerHTML = `
-                    <div class="space-y-4 text-center">
-                        <div><p class="text-sm text-gray-500">Receitas</p><p class="text-2xl font-semibold text-green-600">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p></div>
-                        <div><p class="text-sm text-gray-500">Despesas</p><p class="text-2xl font-semibold text-red-600">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p></div>
-                        <hr class="my-2 border-gray-200">
-                        <div><p class="text-sm text-gray-500">Saldo</p><p class="text-2xl font-bold ${saldo >= 0 ? 'text-gray-800' : 'text-red-700'}">R$ ${saldo.toFixed(2).replace('.', ',')}</p></div>
+                    <div class="space-y-3 text-center">
+                        <div><p class="text-sm text-gray-500">Receitas do Mês</p><p class="text-xl font-semibold text-green-600">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p></div>
+                        <div><p class="text-sm text-gray-500">Despesas do Mês</p><p class="text-xl font-semibold text-red-600">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p></div>
+                        <hr class="my-2 border-gray-300">
+                        <div><p class="text-sm text-gray-500">Saldo Mensal</p><p class="text-2xl font-bold ${saldo >= 0 ? 'text-gray-800' : 'text-red-700'}">R$ ${saldo.toFixed(2).replace('.', ',')}</p></div>
+                        
+                        <div><p class="text-sm text-gray-500">Saldo Atual (até hoje)</p><p class="text-2xl font-bold ${saldoAtual >= 0 ? 'text-indigo-800' : 'text-orange-600'}">R$ ${saldoAtual.toFixed(2).replace('.', ',')}</p></div>
                     </div>`;
             };
 
